@@ -2,3 +2,12 @@ name: advancementRanking
 version: '0.0.0'
 main: fox.ryukkun_.advancementRanking.AdvancementRanking
 api-version: '1.21'
+commands:
+  advancement-ranking:
+    description: 進捗の達成率について教えてくれるよ！
+    usage: advancement-ranking min<int> max<int>
+    permission:
+
+permissions:
+  advancementranking.commands:
+    default: op
