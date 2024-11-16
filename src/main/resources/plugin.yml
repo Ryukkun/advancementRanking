@@ -1,0 +1,4 @@
+name: advancementRanking
+version: '0.0.0'
+main: fox.ryukkun_.advancementRanking.AdvancementRanking
+api-version: '1.21'
