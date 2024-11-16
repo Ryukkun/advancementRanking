@@ -63,27 +63,39 @@ public class AdvancementRankingCommand implements CommandExecutor {
 
         if (uuids.size() <= min) {
             sender.sendMessage("表示できるプレイヤーがいません ( playerCount : " + uuids.size() + " )");
+            return true;
         }
         final ArrayList<Pair> doneAdvCount = new ArrayList<>(uuids.stream()
                 .map(uuid -> new Pair(uuid, AdvancementReader.getCount(uuid)))
                 .toList());
-
         doneAdvCount.sort(Comparator.comparingInt(Pair::doneAdvCount).reversed());
+
+        final int[] ranks = new int[doneAdvCount.size()];
+        for (int i = 0, lastRank = -1, lastCount = -1; i < doneAdvCount.size(); i++) {
+            final int count = doneAdvCount.get(i).doneAdvCount;
+            if (lastCount == count) {
+                ranks[i] = lastRank;
+                continue;
+            }
+            ranks[i] = lastRank = i+1;
+            lastCount = count;
+        }
+
         ComponentBuilder texts = new ComponentBuilder("")
                 .append("--------------").strikethrough(true).color(ChatColor.GOLD)
                 .append(" advancement ").strikethrough(false)
                 .append("---------------\n").strikethrough(true);
-
         for (int i = min; i < Math.min(max, uuids.size()); i++) {
             Pair pair = doneAdvCount.get(i);
+            int rank = ranks[i];
             double percent = Math.floor(((double) (pair.doneAdvCount()*10000)) / availableAdvancement.size()) / 100;
             String air = String.join("", Collections.nCopies(5-(String.valueOf(percent).length()-1), "_"));
 
-            texts.append("    " + ((i <= 8) ? "0" : "") + (i+1) + "位 :  ").reset();
-            rankingColor(texts, i);
+            texts.append("    " + ((rank <= 9) ? "0" : "") + rank + "位 :  ").reset();
+            rankingColor(texts, rank);
             texts.append(air).color(ChatColor.DARK_GRAY);
             texts.append(percent + "% ");
-            rankingColor(texts, i);
+            rankingColor(texts, rank);
             texts.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(pair.doneAdvCount() + " / " + availableAdvancement.size())));
 
             texts.append(Bukkit.getOfflinePlayer(pair.uuid()).getName() + "\n").reset();
@@ -95,10 +107,12 @@ public class AdvancementRankingCommand implements CommandExecutor {
 
         if (args.length >= 3) {
             Player player = Bukkit.getPlayerExact(args[2]);
-            if (player != null) {
-                player.spigot().sendMessage(texts.create());
+            if (player == null) {
+                sender.sendMessage("指定したプレイヤーが見つかりません。");
                 return true;
             }
+            player.spigot().sendMessage(texts.create());
+            return true;
         }
         Bukkit.getServer().spigot().broadcast(texts.create());
         return true;
@@ -107,17 +121,17 @@ public class AdvancementRankingCommand implements CommandExecutor {
 
     private void rankingColor(ComponentBuilder texts, int rank) {
         switch (rank) {
-            case 0:
+            case 1:
                 texts.color(ChatColor.YELLOW).bold(true);
                 break;
-            case 1:
+            case 2:
                 texts.color(ChatColor.AQUA).bold(true);
                 break;
-            case 2:
+            case 3:
                 texts.color(ChatColor.WHITE).bold(true);
                 break;
             default:
-                texts.color(ChatColor.GRAY);
+                texts.color(ChatColor.GRAY).bold(true);
         }
     }
 
