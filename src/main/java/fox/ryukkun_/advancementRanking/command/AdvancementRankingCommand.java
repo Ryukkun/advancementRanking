@@ -39,7 +39,7 @@ public class AdvancementRankingCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String s, String[] args) {
         if (args.length <= 1) {
             return false;
         }
