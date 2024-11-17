@@ -88,13 +88,15 @@ public class AdvancementRankingCommand implements CommandExecutor {
         for (int i = min; i < Math.min(max, uuids.size()); i++) {
             Pair pair = doneAdvCount.get(i);
             int rank = ranks[i];
-            double percent = Math.floor(((double) (pair.doneAdvCount()*10000)) / availableAdvancement.size()) / 100;
-            String air = String.join("", Collections.nCopies(5-(String.valueOf(percent).length()-1), "_"));
+            double percent = (double) (pair.doneAdvCount()) * 100 / availableAdvancement.size();
+            int percentDec = (int) (percent * 100 % 100);
+            String percentStr = (int) percent + "." + (percentDec <= 9 ? "0"+percentDec : percentDec);
+            String air = String.join("", Collections.nCopies(6-percentStr.length(), "_"));
 
-            texts.append("    " + ((rank <= 9) ? "0" : "") + rank + "位 :  ").reset();
+            texts.append("    " + ((rank <= 9) ? "0"+rank : rank) + "位 :  ").reset();
             rankingColor(texts, rank);
             texts.append(air).color(ChatColor.DARK_GRAY);
-            texts.append(percent + "% ");
+            texts.append(percentStr + "% ");
             rankingColor(texts, rank);
             texts.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(pair.doneAdvCount() + " / " + availableAdvancement.size())));
 
