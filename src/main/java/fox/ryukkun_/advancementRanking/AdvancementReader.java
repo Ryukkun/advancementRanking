@@ -9,18 +9,22 @@ import org.bukkit.Bukkit;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class AdvancementReader {
     private static final Path advancementPATH = Bukkit.getServer().getWorldContainer().toPath().resolve("world/advancements");
+    private static final List<String> availableAdName = AdvancementRankingCommand.availableAdvancement.stream()
+            .map(ad -> ad.getKey().getNamespace() + ":" + ad.getKey().getKey())
+            .toList();
 
     public static int getCount(UUID uuid) {
         int ret = 0;
         try (JsonReader reader = new JsonReader(new FileReader(advancementPATH.resolve(uuid.toString()+".json").toFile()))) {
             JsonObject json = new Gson().fromJson(reader, JsonObject.class);
             Set<String> keys = json.keySet();
-            keys.retainAll(AdvancementRankingCommand.availableAdvancement);
+            keys.retainAll(availableAdName);
 
             for (String key : keys) {
                 final JsonObject advancementObject = json.getAsJsonObject(key);

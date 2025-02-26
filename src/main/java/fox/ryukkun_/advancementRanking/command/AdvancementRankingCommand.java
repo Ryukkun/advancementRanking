@@ -12,7 +12,6 @@ import org.bukkit.advancement.Advancement;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -21,10 +20,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 public class AdvancementRankingCommand implements CommandExecutor {
-    public static final HashSet<String> availableAdvancement = new HashSet<>();
+    public static final HashSet<Advancement> availableAdvancement = new HashSet<>();
     static {
         final Iterator<Advancement> advancements = Bukkit.advancementIterator();
 
@@ -33,8 +33,7 @@ public class AdvancementRankingCommand implements CommandExecutor {
             if (advancement.getDisplay() == null) {
                 continue;
             }
-
-            availableAdvancement.add("minecraft:" + advancement.getKey().getKey());
+            availableAdvancement.add(advancement);
         }
     }
 
@@ -52,21 +51,20 @@ public class AdvancementRankingCommand implements CommandExecutor {
             return false;
         }
 
-        final ArrayList<@NonNull UUID> uuids = new ArrayList<>(
-                Bukkit.getOnlinePlayers().stream()
-                        .map(Entity::getUniqueId)
-                        .toList());
-        uuids.addAll(Arrays.stream(Bukkit.getOfflinePlayers())
-                        .map(OfflinePlayer::getUniqueId)
-                        .filter(uuid -> !uuids.contains(uuid))
-                        .toList());
-
-        if (uuids.size() <= min) {
-            sender.sendMessage("表示できるプレイヤーがいません ( playerCount : " + uuids.size() + " )");
+        OfflinePlayer[] players = Bukkit.getOfflinePlayers();
+        if (players.length <= min) {
+            sender.sendMessage("表示できるプレイヤーがいません ( playerCount : " + players.length + " )");
             return true;
         }
-        final ArrayList<Pair> doneAdvCount = new ArrayList<>(uuids.stream()
-                .map(uuid -> new Pair(uuid, AdvancementReader.getCount(uuid)))
+        final List<Pair> doneAdvCount = new ArrayList<>( Arrays.stream(players)
+                .map(player -> {
+                    int count = (player.isOnline() && player.getPlayer() != null)
+                            ? (int) availableAdvancement.stream()
+                                .filter(ad -> player.getPlayer().getAdvancementProgress(ad).isDone())
+                                .count()
+                            : AdvancementReader.getCount(player.getUniqueId());
+                    return new Pair(player.getUniqueId(), count);
+                })
                 .toList());
         doneAdvCount.sort(Comparator.comparingInt(Pair::doneAdvCount).reversed());
 
@@ -85,7 +83,7 @@ public class AdvancementRankingCommand implements CommandExecutor {
                 .append("--------------").strikethrough(true).color(ChatColor.GOLD)
                 .append(" advancement ").strikethrough(false)
                 .append("---------------\n").strikethrough(true);
-        for (int i = min; i < Math.min(max, uuids.size()); i++) {
+        for (int i = min; i < Math.min(max, players.length); i++) {
             Pair pair = doneAdvCount.get(i);
             int rank = ranks[i];
             double percent = (double) (pair.doneAdvCount()) * 100 / availableAdvancement.size();
