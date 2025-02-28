@@ -1,6 +1,6 @@
 name: advancementRanking
 version: '0.0.0'
-main: fox.ryukkun_.advancementRanking.AdvancementRanking
+main: fox.ryukkun_.advancementRanking.Main
 api-version: '1.21'
 commands:
   advancement-ranking:
