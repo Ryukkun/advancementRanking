@@ -18,13 +18,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 public class AdvancementRanking implements CommandExecutor {
-    public static final HashSet<Advancement> availableAdvancement = new HashSet<>();
+    public static final List<Advancement> availableAdvancement = new ArrayList<>();
     static {
         final Iterator<Advancement> advancements = Bukkit.advancementIterator();
 
@@ -57,14 +56,7 @@ public class AdvancementRanking implements CommandExecutor {
             return true;
         }
         final List<Pair> doneAdvCount = new ArrayList<>( Arrays.stream(players)
-                .map(player -> {
-                    int count = (player.isOnline() && player.getPlayer() != null)
-                            ? (int) availableAdvancement.stream()
-                                .filter(ad -> player.getPlayer().getAdvancementProgress(ad).isDone())
-                                .count()
-                            : AdvancementReader.getCount(player.getUniqueId());
-                    return new Pair(player.getUniqueId(), count);
-                })
+                .map(player -> new Pair(player.getUniqueId(), AdvancementReader.getCount(player)))
                 .toList());
         doneAdvCount.sort(Comparator.comparingInt(Pair::doneAdvCount).reversed());
 
