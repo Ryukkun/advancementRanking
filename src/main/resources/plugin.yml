@@ -4,10 +4,17 @@ main: fox.ryukkun_.advancementRanking.Main
 api-version: '1.21'
 commands:
   advancement-ranking:
-    description: 進捗の達成率について教えてくれるよ！
+    description: 進捗の達成率のランキングについて教えてくれるよ！
     usage: advancement-ranking min<int> max<int>
-    permission:
+    permission: advancement-ranking.board
+  advancement-progress:
+    description: 個々の進捗の達成率について
+    usage: advancement-progress target<Player>
+    permission: advancement-ranking.progress
+
 
 permissions:
-  advancementranking.commands:
+  advancement-ranking.board:
     default: op
+  advancement-ranking.progress:
+    default: true
