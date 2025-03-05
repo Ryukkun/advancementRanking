@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class AdvancementRanking implements CommandExecutor {
+public class Ranking implements CommandExecutor {
     public static final List<Advancement> availableAdvancement = new ArrayList<>();
     static {
         final Iterator<Advancement> advancements = Bukkit.advancementIterator();
